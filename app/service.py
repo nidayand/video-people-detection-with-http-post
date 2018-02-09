@@ -9,6 +9,7 @@ from scan import Detect
 uid = "opencv"
 pwd = "passw0rd"
 last_id = 0
+scewed = (533, 400)
 url_login = "http://192.168.2.244:5000/webapi/auth.cgi?api=SYNO.API.Auth&method=Login&version=2&account={}&passwd={}&session=SurveillanceStation".format(uid,pwd)
 url_check = "http://192.168.2.244:5000/webapi/entry.cgi?version=6&api=%22SYNO.SurveillanceStation.Recording%22&toTime=0&offset=0&limit=1&fromTime=0&method=%22List%22&_sid={}"
 
@@ -50,7 +51,7 @@ def check_list():
                 obj = Detect(dparams.api, dparams.conf, dparams.frames)
 
                 # run the analysis of the file
-                obj.run("/movies/"+path)
+                obj.run("/movies/"+path, scewed)
 
                 # save id
                 last_id = j["data"]["recordings"][0]["id"]
