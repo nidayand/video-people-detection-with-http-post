@@ -3,6 +3,8 @@ import cv2
 import argparse
 import video
 from pushbullet import Pushbullet
+import time
+import os
 
 # initialize the list of class labels MobileNet SSD was trained to
 # detect, then generate a set of bounding box colors for each class
@@ -30,11 +32,48 @@ class Detect:
 
     def run(self, movie, scewed = None):
         global CLASSES, COLORS
-        # open video stream
-        cam = video.create_capture(movie)
+
+        # check that the file is not too big. Will check again
+        # as this possibly captures continous saving
+        try:
+            if os.stat(movie).st_size/1024/1024 > int(os.getenv('MAX_SIZE',"20")):
+                # too large file to process
+                print('too large file to process. skipping. '+movie)
+                return
+        except:
+            pass
+
+        cam = None
+        avail = False
+        c = 0
+        while not avail:
+            if c > 30:
+                print('it takes too long time to open the video (>60s). skipping analysis (exit)')
+                return
+
+            # open video stream
+            cam = video.create_capture(movie)
+            if cam.isOpened():
+                avail = True
+            else:
+                c += 1
+                time.sleep(2)
+
+        print('movie is ready to be read!')
+
+        # verifying again that the saved file did not exceed
+        # during saving 20 MB
+        try:
+            if os.stat(movie).st_size/1024/1024 > int(os.getenv('MAX_SIZE',"20")):
+                # too large file to process
+                print('too large file to process. skipping. '+movie)
+                return
+        except:
+            pass
 
         # picture with highest confidence will be sent
         highest_confidence = 0
+        output_image = None
 
         while True:
             # dont analyze every frame. it will simply
@@ -95,13 +134,13 @@ class Detect:
                         cv2.putText(frame, label, (startX, y),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, COLORS[idx], 2)
 
-                        # show the output image
-                        cv2.imwrite( "frame.jpg", frame );
+                        # store the output image
+                        output_image = frame
                         highest_confidence = confidence
         # send to pushbullet
         if highest_confidence > 0:
+            cv2.imwrite( "frame.jpg", output_image );
             with open("frame.jpg", "rb") as pic:
-                file_data = pb.upload_file(pic, "Person Detected")
-                push = pb.push_file(**file_data)
-
+                file_data = self.pushbullet.upload_file(pic, "Person Detected")
+                push = self.pushbullet.push_file(**file_data)
         cam.release()
