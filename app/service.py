@@ -8,7 +8,7 @@ import os
 # Envi
 # MAX_SIZE (20) = Maximum filesize of the file to be analyzed
 # PUSHBULLET = API key
-# FRAMES = check every x frames
+# FRAMES  (5)= check every x frames
 # CONFIDENCE (0.2) = level of assurance
 # USERNAME = synology username to access the web api
 # PASSWORD
@@ -18,11 +18,15 @@ import os
 
 last_id = 0
 
-scewed = (int(os.getenv("WIDTH","640")), int(os.getenv("HEIGHT","480"))
-url_login = os.getenv("WEBAPIPATH","http://127.0.0.1:5000/webapi")+"/auth.cgi?api=SYNO.API.Auth&method=Login&version=2&account={}&passwd={}&session=SurveillanceStation".format(os.getenv("USERNAME"),os.getenv("PASSWORD"))
-url_check = os.getenv("WEBAPIPATH","http://127.0.0.1:5000/webapi")+"/entry.cgi?version=6&api=%22SYNO.SurveillanceStation.Recording%22&toTime=0&offset=0&limit=1&fromTime=0&method=%22List%22&_sid={}"
+# set image correcting
+scewed = (int(os.getenv("WIDTH","640")), int(os.getenv("HEIGHT","480")))
 
-dparams = {"api": os.getenv("o.8CVJHMxyRr6zyR753AGIDENm8H3wMjyn"), "frames": int(os.getenv('FRAMES',"5")), "conf": float(os.getenv('CONFIDENCE',"0.2"))}
+# accessing the json apis of surveillance station
+url_login = os.getenv("WEBAPIPATH","http://192.168.2.2:5000/webapi")+"/auth.cgi?api=SYNO.API.Auth&method=Login&version=2&account={}&passwd={}&session=SurveillanceStation".format(os.getenv("USERNAME"),os.getenv("PASSWORD"))
+url_check = os.getenv("WEBAPIPATH","http://192.168.2.2:5000/webapi")+"/entry.cgi?version=6&api=%22SYNO.SurveillanceStation.Recording%22&toTime=0&offset=0&limit=1&fromTime=0&method=%22List%22&_sid={}"
+
+# set the parameters needed for the analysis
+dparams = {"api": os.getenv("PUSHBULLET"), "frames": int(os.getenv('FRAMES',"5")), "conf": float(os.getenv('CONFIDENCE',"0.2"))}
 
 # HTTPRequestHandler class
 class testHTTPServer_RequestHandler(BaseHTTPRequestHandler):
