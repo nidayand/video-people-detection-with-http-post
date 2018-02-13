@@ -40,7 +40,6 @@ class testHTTPServer_RequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         parsed_path = urlparse(self.path)
         if parsed_path.path == '/poll':
-            print(parsed_path)
             self.send_response(200)
 
             # Send message back to client
