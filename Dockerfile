@@ -1,4 +1,4 @@
-FROM python:3.6
+FROM python:3.6.4-slim
 MAINTAINER Peter Gothager <pggithub@gothager.se>
 
 RUN apt-get update && \
