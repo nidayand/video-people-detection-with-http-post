@@ -1,6 +1,5 @@
 import numpy as np
 import cv2
-import argparse
 import video
 from pushbullet import Pushbullet
 import time
@@ -9,12 +8,13 @@ import os
 # initialize the list of class labels MobileNet SSD was trained to
 # detect, then generate a set of bounding box colors for each class
 CLASSES = ["background", "aeroplane", "bicycle", "bird", "boat",
-    "bottle", "bus", "car", "cat", "chair", "cow", "diningtable",
-    "dog", "horse", "motorbike", "person"]
+           "bottle", "bus", "car", "cat", "chair", "cow", "diningtable",
+           "dog", "horse", "motorbike", "person"]
 COLORS = np.random.uniform(0, 255, size=(len(CLASSES), 3))
 
 prototxt = "MobileNetSSD_deploy.prototxt.txt"
 model = "MobileNetSSD_deploy.caffemodel"
+
 
 class Detect:
     def __init__(self, api, conf, frames):
@@ -30,13 +30,13 @@ class Detect:
     description = 'Scanning for a person and sends a pusbullet image if detected'
     author = 'Peter Gothager <pggithub@gothager.se'
 
-    def run(self, movie, scewed = None):
+    def run(self, movie, scewed=None):
         global CLASSES, COLORS
 
         # check that the file is not too big. Will check again
         # as this possibly captures continous saving
         try:
-            if os.stat(movie).st_size/1024/1024 > int(os.getenv('MAX_SIZE',"20")):
+            if os.stat(movie).st_size/1024/1024 > int(os.getenv('MAX_SIZE', "20")):
                 # too large file to process
                 print('too large file to process. skipping. '+movie)
                 return
@@ -64,7 +64,7 @@ class Detect:
         # verifying again that the saved file did not exceed
         # during saving 20 MB
         try:
-            if os.stat(movie).st_size/1024/1024 > int(os.getenv('MAX_SIZE',"20")):
+            if os.stat(movie).st_size/1024/1024 > int(os.getenv('MAX_SIZE', "20")):
                 # too large file to process
                 print('too large file to process. skipping. '+movie)
                 return
@@ -79,7 +79,7 @@ class Detect:
             # dont analyze every frame. it will simply
             # take forever
             if self.frames > 1:
-                for x in range (0, (self.frames - 1)):
+                for x in range(0, (self.frames-1)):
                     try:
                         ret, frame = cam.read()
                     except:
@@ -120,7 +120,7 @@ class Detect:
                     # extract confidence
                     confidence = detections[0, 0, i, 2]
 
-                    #filter out for higher confidence than confidenceset var
+                    # filter out for higher confidence than confidenceset var
                     if confidence > self.conf and confidence > highest_confidence:
                         # display prediction
                         box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
@@ -128,19 +128,27 @@ class Detect:
 
                         label = "{}: {:.2f}%".format(CLASSES[idx], confidence * 100)
                         print("[INFO] {}".format(label))
-                        cv2.rectangle(frame, (startX, startY), (endX, endY),
-                            COLORS[idx], 2)
+                        cv2.rectangle(frame,
+                                      (startX, startY),
+                                      (endX, endY),
+                                      COLORS[idx],
+                                      2)
                         y = startY - 15 if startY - 15 > 15 else startY + 15
-                        cv2.putText(frame, label, (startX, y),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, COLORS[idx], 2)
+                        cv2.putText(frame,
+                                    label,
+                                    (startX, y),
+                                    cv2.FONT_HERSHEY_SIMPLEX,
+                                    0.5,
+                                    COLORS[idx],
+                                    2)
 
                         # store the output image
                         output_image = frame
                         highest_confidence = confidence
         # send to pushbullet
         if highest_confidence > 0:
-            cv2.imwrite( "frame.jpg", output_image );
+            cv2.imwrite("frame.jpg", output_image)
             with open("frame.jpg", "rb") as pic:
                 file_data = self.pushbullet.upload_file(pic, "Person Detected")
-                push = self.pushbullet.push_file(**file_data)
+                self.pushbullet.push_file(**file_data)
         cam.release()
