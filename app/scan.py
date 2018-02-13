@@ -149,6 +149,6 @@ class Detect:
         if highest_confidence > 0:
             cv2.imwrite("frame.jpg", output_image)
             with open("frame.jpg", "rb") as pic:
-                file_data = self.pushbullet.upload_file(pic, "Person Detected")
-            push = self.pushbullet.push_file(**file_data)
+                file_data = self.pushbullet.upload_file(pic, "person.jpg")
+            self.pushbullet.push_file(**file_data)
         cam.release()
