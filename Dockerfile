@@ -20,6 +20,7 @@ RUN apt-get update && \
         libavformat-dev \
         libpq-dev
 
+RUN pip install --upgrade pip
 RUN pip install numpy
 
 WORKDIR /
