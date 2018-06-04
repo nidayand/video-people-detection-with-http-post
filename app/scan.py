@@ -9,7 +9,12 @@ import os
 # detect, then generate a set of bounding box colors for each class
 CLASSES = ["background", "aeroplane", "bicycle", "bird", "boat",
            "bottle", "bus", "car", "cat", "chair", "cow", "diningtable",
-           "dog", "horse", "motorbike", "person"]
+           "dog", "horse", "motorbike", "person", "pottedplant", "sheep",
+           "sofa", "train", "tvmonitor"]
+IGNORE = set(["background", "aeroplane", "bicycle", "bird", "boat",
+              "bottle", "bus", "car", "cat", "chair", "cow", "diningtable",
+              "dog", "horse", "motorbike", "pottedplant", "sheep",
+              "sofa", "train", "tvmonitor"])
 COLORS = np.random.uniform(0, 255, size=(len(CLASSES), 3))
 
 prototxt = "MobileNetSSD_deploy.prototxt.txt"
@@ -113,38 +118,38 @@ class Detect:
                 idx = int(detections[0, 0, i, 1])
 
                 # only continue if it is a person
-                if idx > 16:
+                if CLASSES[idx] in IGNORE:
                     continue
-                obj_type = CLASSES[idx]
-                if obj_type == "person":
-                    # extract confidence
-                    confidence = detections[0, 0, i, 2]
 
-                    # filter out for higher confidence than confidenceset var
-                    if confidence > self.conf and confidence > highest_confidence:
-                        # display prediction
-                        box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
-                        (startX, startY, endX, endY) = box.astype("int")
+                # extract confidence
+                confidence = detections[0, 0, i, 2]
 
-                        label = "{}: {:.2f}%".format(CLASSES[idx], confidence * 100)
-                        print("[INFO] {}".format(label))
-                        cv2.rectangle(frame,
-                                      (startX, startY),
-                                      (endX, endY),
-                                      COLORS[idx],
-                                      2)
-                        y = startY - 15 if startY - 15 > 15 else startY + 15
-                        cv2.putText(frame,
-                                    label,
-                                    (startX, y),
-                                    cv2.FONT_HERSHEY_SIMPLEX,
-                                    0.5,
-                                    COLORS[idx],
-                                    2)
+                # filter out for higher confidence than confidenceset var
+                if confidence > self.conf and confidence > highest_confidence:
+                    # display prediction
+                    box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
+                    (startX, startY, endX, endY) = box.astype("int")
 
-                        # store the output image
-                        output_image = frame
-                        highest_confidence = confidence
+                    label = "{}: {:.2f}%".format(CLASSES[idx], confidence * 100)
+                    print("[INFO] {}".format(label))
+                    cv2.rectangle(frame,
+                                  (startX, startY),
+                                  (endX, endY),
+                                  COLORS[idx],
+                                  2)
+                    y = startY - 15 if startY - 15 > 15 else startY + 15
+                    cv2.putText(frame,
+                                label,
+                                (startX, y),
+                                cv2.FONT_HERSHEY_SIMPLEX,
+                                0.5,
+                                COLORS[idx],
+                                2)
+
+                    # store the output image
+                    output_image = frame
+                    highest_confidence = confidence
+
         # send to pushbullet
         if highest_confidence > 0:
             cv2.imwrite("frame.jpg", output_image)

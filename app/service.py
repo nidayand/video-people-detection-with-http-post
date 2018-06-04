@@ -40,10 +40,10 @@ class testHTTPServer_RequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         parsed_path = urlparse(self.path)
         if parsed_path.path == '/poll':
-            self.send_response(200)
 
             # Send message back to client
             message = check_list()
+            self.send_response(200)
             response = bytes(str(message), "utf8")
 
             # Send headers
@@ -53,8 +53,8 @@ class testHTTPServer_RequestHandler(BaseHTTPRequestHandler):
 
             # Write content as utf-8 data
             self.wfile.write(response)
-        else:
-            self.send_error(500, "incorrect path")
+        #else:
+        #    self.send_error(500, "incorrect path")
 
 
 # to be used by the action rule to initate the object detection
@@ -66,8 +66,10 @@ def check_list():
     if myResponse.ok:
         # convert to object
         j = json.loads(myResponse.content)
+        print("List response: {}".format(j))
         if j["success"]:
             if last_id != 0 and last_id != j["data"]["recordings"][0]["id"]:
+                print("A new video to analyze!")
                 # new entry
                 path = j["data"]["recordings"][0]["cameraName"] + "/" + \
                         j["data"]["recordings"][0]["filePath"]
@@ -90,6 +92,7 @@ def check_list():
                                    "id": last_id})
             else:
                 # save id
+                print("No new video to analyze")
                 last_id = j["data"]["recordings"][0]["id"]
                 return json.dumps({"success:": True,
                                    "update": False,
@@ -97,11 +100,13 @@ def check_list():
                                    "id": last_id})
 
         else:
+            print("Failed to get list response")
             return json.dumps({"success:": False,
                                "update": False,
                                "value": "failed to get list data"})
 
     else:
+        print("Failed to get a response from surveillance station")
         return json.dumps({"success:": False,
                            "update": False,
                            "value": "did not receive a response from surveillance station"})
@@ -117,7 +122,7 @@ def login():
             # update the list url with the sid
             url_check = url_check.format(j["data"]["sid"])
 
-            print("successful login")
+            print("Successful login")
             return True
         else:
             return False
@@ -131,11 +136,14 @@ def run():
     # start web server
     server_address = ('', 8080)
     httpd = HTTPServer(server_address, testHTTPServer_RequestHandler)
+
+    # initiate list variables by getting the latest id
+    print("Get the latest id of a video")
+    check_list()
+
     print('started server')
     httpd.serve_forever()
 
-    # initiate list variables by getting the latest id
-    check_list()
 
 
 if __name__ == "__main__":
