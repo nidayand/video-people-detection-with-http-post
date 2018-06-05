@@ -118,7 +118,7 @@ class Detect:
                 idx = int(detections[0, 0, i, 1])
 
                 # only continue if it is a person
-                if CLASSES[idx] in IGNORE:
+                if idx<0 or CLASSES[idx] in IGNORE:
                     continue
 
                 # extract confidence
