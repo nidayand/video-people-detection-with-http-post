@@ -68,8 +68,11 @@ docker-compose build
 ## Behaviour
 - Container includes a webserver that listens to a POST request on `"/lookforperson"` path
 - The POST request must include a video file to be analysed. Parameter `"video"`
-- Container is searching for a person in the video frame by frame (every [FRAME env.] frame)
-- If a person is spotted with a confidence above [CONFIDENCE env.] an URL-post will happen to [URLPATH env.]
+- Container is searching for a person in the video frame by frame (every `[FRAME env.]` frame)
+- If a person is spotted with a confidence above `[CONFIDENCE env.]` an URL-post will happen to `[URLPATH env.]``
+- If `[GOOD_ENOUGH_CONFIDENCE env.]` is set the frame scanning will stop when a value is found above otherwise it will assess the entire video
+- If the width or height is larger that `[WIDTH_PERSON]` or `[HEIGHT_PERSON]` the frame will be skipped
+- If the person detected will have a larger ratio that `[WIDTH_PERSON]/[HEIGHT_PERSON]` the frame will be skipped
 - The result will be returned in a JSON string
 
 ```javascript
