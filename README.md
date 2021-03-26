@@ -4,15 +4,70 @@ The final result of an analysis will be pushed via an HTTP POST including the im
 
 OpenCV is compiled to be able to run on a Synology NAS.
 
-## Build
-docker-compose build
+## How I use it
+I use the container to get rid of CCTV notification noise - i.e. I'm alerted only if a person is detected around my house
+1. Using MotionEye OS I have 6 video streams the is triggering recordings based on changes in the number of pixels in a frame
+2. If a motion is detected MotionEye will run a command when the file has been saved
+```bash
+curl -F video=@%f http://192.168.2.244:8094/lookforperson
+```
+![MotionEye](https://i.imgur.com/nE9e9c9.png)
 
-## Parameters
-See [docker-compose.yml](https://github.com/nidayand/video-people-detection-with-http-post/blob/main/docker-compose.yml) example
+3. `curl` does a post of the mp4 file to the docker container
+4. The container will post the result to a Node-RED instance that listens to a HTTP POST with a video and it will send the image further to my Discord server
+
+![Node-RED](https://i.imgur.com/PuOfo95.png)
+
+## docker-compose.yml
+```yaml
+version: "2"
+services:
+  people_recognition:
+    container_name: opencv_findperson
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: "nidayand/video-people-detection-with-http-post"
+    ports:
+      - "8094:8080"
+    environment: 
+      # URL to post image result to. Path will be appended with a field called "file" with type image/jpg
+      - URLPATH=http://192.168.2.104:1880/videonotify
+
+      # Confidence level of assessed frames
+      - CONFIDENCE=0.5
+
+      # Good enough confidence level. If this level or above don't continue with the video analysis
+      - GOOD_ENOUGH_CONFIDENCE=0.7
+
+      # Every x frame will be checked for a person
+      - FRAMES=5
+
+      # Resizing frame for analysis to improve performance. Default values 640/480
+      - WIDTH=640
+      - HEIGHT=480
+
+      # MAX % of image that can be a person
+      # Set to 0 to disable or remove entry
+      - WIDTH_PERSON=30
+      - HEIGHT_PERSON=60
+
+      # Validate that height/width of a person is not above difference compared to max HEIGHT_PERSON/WIDTH_PERSON
+      # Avoids strange dimensions e.g. 50x3 when more likely 50x25
+      # Set to 0 to disable or remove entry
+      - WIDTH_HEIGHT_RATIO_COMPARE_DIFF=20  
+```
+
+
+
+## Build
+```bash
+docker-compose build
+```
 
 ## Behaviour
-- Container includes a webserver that listens to a POST request on "/lookforperson" path
-- The POST request must include a video file to be analysed. Parameter "video"
+- Container includes a webserver that listens to a POST request on `"/lookforperson"` path
+- The POST request must include a video file to be analysed. Parameter `"video"`
 - Container is searching for a person in the video frame by frame (every [FRAME env.] frame)
 - If a person is spotted with a confidence above [CONFIDENCE env.] an URL-post will happen to [URLPATH env.]
 - The result will be returned in a JSON string
@@ -20,11 +75,6 @@ See [docker-compose.yml](https://github.com/nidayand/video-people-detection-with
 ```javascript
 {"success": true, "confidence": "0.7131952", "width": 14, "height": 31, "ratio_diff": 10, "comment": "Person was found"}
 ```
-
-### Incoming PATH
-POST request: http://127.0.0.1:8094/lookforperson?video={mp4 to be analyzed}
-
-Path must be file system accessible path for the docker container.
 
 ## Test
 ```bash
