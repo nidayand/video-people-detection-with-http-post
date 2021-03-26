@@ -36,5 +36,5 @@ services:
       - WIDTH_HEIGHT_RATIO_COMPARE_DIFF=20  
     volumes: 
       #USED FOR DEVELOPMENT. MOUNTS LOCAL app FOLDER to replace copied version
-      - "./app:/app" 
+      #- "./app:/app" 
 
