@@ -1,53 +1,43 @@
 import requests
 import json
 from urllib.parse import urlparse
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from flask import Flask, request, render_template
 from scan import Detect
 import os
 
-"""
-MAX_SIZE (20) = Maximum filesize of the file to be analyzed
-PUSHBULLET = API key
-FRAMES  (5)= check every x frames
-CONFIDENCE (0.2) = level of assurance
-WIDTH (640) = Correction of image in pixels
-HEIGHT (480) = Correction of image in pixels
-"""
-
-# set image correcting
-scewed = (int(os.getenv("WIDTH", "640")), int(os.getenv("HEIGHT", "480")))
 
 # set the parameters needed for the analysis
-dparams = {"api": os.getenv("PUSHBULLET"),
-           "frames": int(os.getenv('FRAMES', "5")),
-           "conf": float(os.getenv('CONFIDENCE', "0.2"))}
+dparams = {
+    "urlpath": os.getenv("URLPATH"),
+    "frames": int(os.getenv("FRAMES", "5")),
+    "conf": float(os.getenv("CONFIDENCE", "0.2")),
+    "good_enough_conf": float(os.getenv("GOOD_ENOUGH_CONFIDENCE", "0.8")),
+    "width_person": int(os.getenv("WIDTH_PERSON", "0")),
+    "height_person": int(os.getenv("HEIGHT_PERSON", "0")),
+    "width": int(os.getenv("WIDTH", "640")),
+    "height": int(os.getenv("HEIGHT", "480")),
+    "ratio": int(os.getenv("WIDTH_HEIGHT_RATIO_COMPARE_DIFF","0"))
+}
 
+# set image correcting
+scewed = (dparams["width"], dparams["height"])
 
-# HTTPRequestHandler class
-class testHTTPServer_RequestHandler(BaseHTTPRequestHandler):
-    # GET
-    def do_GET(self):
-        parsed_path = urlparse(self.path)
-        if parsed_path.path == '/findperson':
-            # get video parameter
-            query = urlparse(self.path).query
-            query_components = dict(qc.split("=") for qc in query.split("&"))
-            video = query_components["video"]
+app = Flask(__name__)
+staticVideoPath = '/tmp/video.mp4'
 
-            # Send message back to client
-            message = check_video(video)
-            self.send_response(200)
-            response = bytes(str(message), "utf8")
+@app.route('/lookforperson', methods=['POST'])
 
-            # Send headers
-            self.send_header('Content-type', 'text/json')
-            self.send_header("Content-Length", len(response))
-            self.end_headers()
+def lookforperson():
+    # Remove old file
+    if os.path.exists(staticVideoPath):
+        os.remove(staticVideoPath)
 
-            # Write content as utf-8 data
-            self.wfile.write(response)
-        #else:
-        #    self.send_error(500, "incorrect path")
+    print("Posted file: {}".format(request.files['video']))
+    file = request.files['video']
+
+    # Save to path
+    file.save(staticVideoPath)
+    return check_video(staticVideoPath)
 
 
 # to be used by the action rule to initate the object detection
@@ -55,24 +45,22 @@ def check_video(video):
     print("A new video to analyze!")
 
     # instantiate the detection object
-    obj = Detect(dparams["api"],
-                 dparams["conf"],
-                 dparams["frames"])
+    obj = Detect(dparams)
 
     # run the analysis of the file
-    obj.run("/videos/"+video, scewed)
+    res = obj.run(video, scewed)
 
     # save id
-    return json.dumps({"success:": True,
-                       "value": video })
+    return json.dumps(res)
+
 
 def run():
     # start web server
-    server_address = ('', 8080)
-    httpd = HTTPServer(server_address, testHTTPServer_RequestHandler)
+    app.run(host='0.0.0.0', port=8080, debug=True)
 
-    print('started server')
+    print("started server")
     httpd.serve_forever()
+
 
 if __name__ == "__main__":
     run()

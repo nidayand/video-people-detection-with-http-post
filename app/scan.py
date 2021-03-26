@@ -1,9 +1,9 @@
 import numpy as np
 import cv2
 import video
-from pushbullet import Pushbullet
 import time
 import os
+import requests
 
 # initialize the list of class labels MobileNet SSD was trained to
 # detect, then generate a set of bounding box colors for each class
@@ -22,17 +22,23 @@ model = "MobileNetSSD_deploy.caffemodel"
 
 
 class Detect:
-    def __init__(self, api, conf, frames):
-        self.pushbullet = Pushbullet(api)
-        self.conf = conf
-        self.frames = frames
+    def __init__(self, dparams):
+        self.urlpath = dparams["urlpath"]
+        self.frames = dparams["frames"]
+        self.conf = dparams["conf"]
+        self.good_enough_conf = dparams["good_enough_conf"]
+        self.width_person = dparams["width_person"]
+        self.height_person = dparams["height_person"]
+        self.width = dparams["width"]
+        self.height = dparams["height"]
+        self.ratio = dparams["ratio"]
 
         global prototxt, model
 
         print('loading model')
         self.net = cv2.dnn.readNetFromCaffe(prototxt, model)
 
-    description = 'Scanning for a person and sends a pusbullet image if detected'
+    description = 'Scanning for a person and sends an image if detected'
     author = 'Peter Gothager <pggithub@gothager.se'
 
     def run(self, movie, scewed=None):
@@ -78,7 +84,10 @@ class Detect:
 
         # picture with highest confidence will be sent
         highest_confidence = 0
+        person_width = 0
+        person_height = 0
         output_image = None
+        output_ratio = 0
 
         while True:
             # dont analyze every frame. it will simply
@@ -130,6 +139,30 @@ class Detect:
                     box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
                     (startX, startY, endX, endY) = box.astype("int")
 
+                    # check size of person
+                    if self.width_person > 0 or self.height_person > 0:
+                        person_width = int((endX-startX)/self.width*100)
+                        person_height = int((endY-startY)/self.height*100)
+                        if self.ratio > 0:
+                            currentRatio = person_height/person_width
+                            compareRatio = self.height_person/self.width_person
+                            compareValue = currentRatio / compareRatio
+                            if compareValue < 1:
+                                compareValue = 1 - compareValue
+                            else:
+                                compareValue = compareValue - 1
+                            compareValue = int(compareValue*100)
+                            if compareValue > self.ratio:
+                                # Ration height/width differs too much. Skip
+                                continue
+                            output_ratio = compareValue
+
+                        if person_width > self.width_person:
+                            continue
+                        if person_height > self.height_person:
+                            continue
+
+
                     label = "{}: {:.2f}%".format(CLASSES[idx], confidence * 100)
                     print("[INFO] {}".format(label))
                     cv2.rectangle(frame,
@@ -150,10 +183,25 @@ class Detect:
                     output_image = frame
                     highest_confidence = confidence
 
-        # send to pushbullet
+                # DETECTIONS IN FRAME: Check if higher than "good_enough_conf"
+                if highest_confidence >= self.good_enough_conf:
+                    break
+
+            # WHILE: Check if higher than "good_enough_conf"
+            if highest_confidence >= self.good_enough_conf:
+                break
+
+        # send to URL path
         if highest_confidence > 0:
+            # save image temporarily
             cv2.imwrite("frame.jpg", output_image)
+
+            # post to urlpath
             with open("frame.jpg", "rb") as pic:
-                file_data = self.pushbullet.upload_file(pic, "person.jpg")
-            self.pushbullet.push_file(**file_data)
+                r = requests.post(self.urlpath, files={'file': ('image.jpg', pic, 'image/jpg')})
+
+            return { "success": True, "confidence": str(highest_confidence), "width": person_width, "height": person_height, "ratio_diff": output_ratio, "comment": "Person was found"}
+        else:
+            return { "success": False, "comment": "No person found"}
+
         cam.release()
