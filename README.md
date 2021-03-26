@@ -1,19 +1,21 @@
 # nidayand/video-people-detection-with-http-post
 Based on nidayand/video-opencv-pushbullet but with more intelligence to remove incorrect reporting + removing Pushbullet as a requirement.
-The final result of an analysis will be pushed via an HTTP POST including the image result
+The final result of an analysis will be pushed via an HTTP POST including the image result.
+
+OpenCV is compiled to be able to run on a Synology NAS.
 
 ## Build
 docker-compose build
 
 ## Parameters
-See docker-compose.yml example
+See [docker-compose.yml](https://github.com/nidayand/video-people-detection-with-http-post/blob/main/docker-compose.yml) example
 
 ## Behaviour
 - Container includes a webserver that listens to a POST request on "/lookforperson" path
 - The POST request must include a video file to be analysed. Parameter "video"
 - Container is searching for a person in the video frame by frame (every [FRAME env.] frame)
 - If a person is spotted with a confidence above [CONFIDENCE env.] an URL-post will happen to [URLPATH env.]
-- The result will be returned in a JSON string. 
+- The result will be returned in a JSON string
 
 ```javascript
 {"success": true, "confidence": "0.7131952", "width": 14, "height": 31, "ratio_diff": 10, "comment": "Person was found"}
