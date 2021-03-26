@@ -34,7 +34,7 @@ services:
       # Avoids strange dimensions e.g. 50x3 when more likely 50x25
       # Set to 0 to disable or remove entry
       - WIDTH_HEIGHT_RATIO_COMPARE_DIFF=20  
-    volumes: 
+    #volumes: 
       #USED FOR DEVELOPMENT. MOUNTS LOCAL app FOLDER to replace copied version
       #- "./app:/app" 
 
