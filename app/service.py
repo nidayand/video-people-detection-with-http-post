@@ -4,6 +4,7 @@ from urllib.parse import urlparse
 from flask import Flask, request, render_template
 from scan import Detect
 import os
+import tempfile
 
 
 # set the parameters needed for the analysis
@@ -28,16 +29,14 @@ staticVideoPath = '/tmp/video.mp4'
 @app.route('/lookforperson', methods=['POST'])
 
 def lookforperson():
-    # Remove old file
-    if os.path.exists(staticVideoPath):
-        os.remove(staticVideoPath)
-
     print("Posted file: {}".format(request.files['video']))
     file = request.files['video']
 
+    tmp_filename = tempfile._get_default_tempdir()+"/"+next(tempfile._get_candidate_names())
+
     # Save to path
-    file.save(staticVideoPath)
-    return check_video(staticVideoPath)
+    file.save(tmp_filename)
+    return check_video(tmp_filename)
 
 
 # to be used by the action rule to initate the object detection
