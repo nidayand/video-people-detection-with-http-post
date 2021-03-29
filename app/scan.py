@@ -184,9 +184,10 @@ class Detect:
                     (startX, startY, endX, endY) = box.astype("int")
 
                     # check size of person
+                    person_width = int((endX - startX) / self.width * 100)
+                    person_height = int((endY - startY) / self.height * 100)
+
                     if self.width_person > 0 or self.height_person > 0:
-                        person_width = int((endX - startX) / self.width * 100)
-                        person_height = int((endY - startY) / self.height * 100)
                         if self.ratio > 0:
                             currentRatio = person_height / person_width
                             compareRatio = self.height_person / self.width_person
