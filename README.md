@@ -7,7 +7,7 @@ OpenCV is compiled to be able to run on a Synology NAS.
 ![Sample](https://i.imgur.com/YCfSBOR.jpg)
 
 ### Input:
-HTTP post to `/lookforperson``
+HTTP post to `/lookforperson`
 #### Parameters:
 - `video`: (POST parameter) File to be analyzed
 
