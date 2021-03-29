@@ -1,8 +1,33 @@
 # nidayand/video-people-detection-with-http-post
-Based on nidayand/video-opencv-pushbullet but with more intelligence to remove incorrect reporting + removing Pushbullet as a requirement.
-The final result of an analysis will be pushed via an HTTP POST including the image result.
+The container includes a webserver that is listening after an incoming HTTP POST message to `/lookforperson` path. The incoming message must include a video to be analyzed on a parameter named `video`.
+Based on the environment settings it will look for a person in the frames of the video and if found it will do an HTTP POST to a server address of choice and include the detected frame, with the highest confidence level, and the details of the detection.
 
 OpenCV is compiled to be able to run on a Synology NAS.
+
+![Sample](https://i.imgur.com/YCfSBOR.jpg)
+
+### Input:
+HTTP post to `/lookforperson``
+#### Parameters:
+- `video`: (POST parameter) File to be analyzed
+
+### Action
+HTTP post to the address specified 
+- `file`: JPG file object attached with the post including the detection
+
+### Output
+The HTTP POST response with be a JSON document and if successful (found a person) it will have the format as per below. `params` are the incoming variables used in the analysis.
+```json
+{
+   "success":true,
+   "confidence":"0.71319485",
+   "width":14,
+   "height":31,
+   "ratio_diff":10,
+   "comment":"Person was found",
+   "params":"{\"urlpath\": \"http://192.168.2.244:1881/reportpersoninvideo\", \"frames\": 5, \"conf\": 0.2, \"good_enough_conf\": 0.7, \"width_person\": 40, \"height_person\": 80, \"width\": 640, \"height\": 480, \"ratio\": 20}"
+}
+```
 
 ## How I use it
 I use the container to get rid of CCTV notification noise - i.e. I'm alerted only if a person is detected around my house
@@ -34,10 +59,10 @@ services:
       # URL to post image result to. Path will be appended with a field called "file" with type image/jpg
       - URLPATH=http://192.168.2.104:1880/videonotify
 
-      # Confidence level of assessed frames
+      # Required minimun level of confidence when detected a person on the analysis of a frame. Default 0.2
       - CONFIDENCE=0.5
 
-      # Good enough confidence level. If this level or above don't continue with the video analysis
+      # Good enough confidence level. Skip additional frame analysis when this level has been reached. Default 0.8
       - GOOD_ENOUGH_CONFIDENCE=0.7
 
       # Every x frame will be checked for a person
