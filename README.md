@@ -5,7 +5,8 @@ Based on the environment settings it will look for a person in the frames of the
 OpenCV is compiled to be able to run on a Synology NAS.
 
 ## Demonstration
-I've created a very demonstration docker-compose file that can be used to test the service. 
+I've created a very demonstration docker-compose file that can be used to test the service. The demo is using Node-RED to present the results from the video file analysis.
+Using your own mp4-file post it to the service endpoint and it will analyze the frames and send the result - if a person is found - for display in the Node-RED UI.
 
 1. Start the setup with the file in the [github](https://github.com/nidayand/video-people-detection-with-http-post) repository
 ```bash
