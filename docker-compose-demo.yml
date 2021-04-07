@@ -1,0 +1,23 @@
+version: "2"
+services:
+  people_recognition:
+    container_name: opencv_findperson
+    image: "nidayand/video-people-detection-with-http-post"
+    environment: 
+      - URLPATH=http://nodered:1880/videonotify
+      - CONFIDENCE=0.5
+      - GOOD_ENOUGH_CONFIDENCE=0.7
+      - FRAMES=5
+      - WIDTH=640
+      - HEIGHT=480
+      - WIDTH_PERSON=30
+      - HEIGHT_PERSON=60
+      - WIDTH_HEIGHT_RATIO_COMPARE_DIFF=20  
+  nodered:
+    container_name: nodered
+    image: nodered/node-red
+    ports:
+      - 1880:1880
+    links:
+      - "people_recognition"
+#    entrypoint: && npm start --cache /data/.npm" -- --userDir /data
