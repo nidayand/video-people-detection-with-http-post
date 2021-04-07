@@ -1,12 +1,12 @@
 # nidayand/video-people-detection-with-http-post
-The container includes a webserver that is listening after an incoming HTTP POST message to `/lookforperson` path. The incoming message must include a video to be analyzed on a parameter named `video`.
-Based on the environment settings it will look for a person in the frames of the video and if found it will do an HTTP POST to a server address of choice and include the detected frame, with the highest confidence level, and the details of the detection.
+The container includes a web server that is listening after an incoming HTTP POST message to the `/lookforperson` path. The incoming message must include a video that is to be analyzed on a parameter named `video`.
+Based on the environment settings it will look for a person in the frames of the video, and if found it will do an HTTP POST request to a web server address of choice and attach the detected frame, with the highest confidence level, and the details of the detection.
 
-OpenCV is compiled to be able to run on a Synology NAS.
+The OpenCV library used is compiled to be able to run on a Synology NAS.
 
 ## Demonstration
-I've created a very demonstration docker-compose file that can be used to test the service. The demo is using Node-RED to present the results from the video file analysis.
-Using your own mp4-file post it to the service endpoint and it will analyze the frames and send the result - if a person is found - for display in the Node-RED UI.
+I've created a very simple docker-compose file that can be used to test the service. The demo is using Node-RED to present the results from the video file analysis.
+Use your own mp4-file and post it to the service endpoint that will analyze the frames and send the result - if a person is found - to display in the Node-RED UI.
 
 1. Start the setup with the file in the [github](https://github.com/nidayand/video-people-detection-with-http-post) repository
 ```bash
@@ -45,8 +45,8 @@ The HTTP POST response with be a JSON document and if successful (found a person
 ```
 
 ## How I use it
-I use the container to get rid of CCTV notification noise - i.e. I'm alerted only if a person is detected around my house
-1. Using MotionEye OS I have 6 video streams the is triggering recordings based on changes in the number of pixels in a frame
+I use the container to get rid of any CCTV notification noise - i.e. I'm alerted only if a person is detected around my house and not only by the amount of changed pixels in a frame.
+1. In MotionEye OS I have 6 video streams that is triggering recordings based on changes in the number of pixels in a frame
 2. If a motion is detected MotionEye will run a command when the file has been saved
 ```bash
 curl -F video=@%f http://192.168.2.244:8094/lookforperson
@@ -106,7 +106,7 @@ docker-compose build
 ```
 
 ## Behaviour
-- Container includes a webserver that listens to a POST request on `"/lookforperson"` path
+- Container includes a web server that listens for a POST request on the `"/lookforperson"` path
 - The POST request must include a video file to be analysed. Parameter `"video"`
 - Container is searching for a person in the video frame by frame (every `[FRAME env.]` frame)
 - If a person is spotted with a confidence above `[CONFIDENCE env.]` an URL-post will happen to `[URLPATH env.]``
