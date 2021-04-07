@@ -4,8 +4,22 @@ Based on the environment settings it will look for a person in the frames of the
 
 OpenCV is compiled to be able to run on a Synology NAS.
 
-![Sample](https://i.imgur.com/YCfSBOR.jpg)
+## Demonstration
+I've created a very demonstration docker-compose file that can be used to test the service. 
 
+1. Start the setup with the file in the [github](https://github.com/nidayand/video-people-detection-with-http-post) repository
+```bash
+docker-compose -f docker-compose-demo.yml up
+```
+2.  Post a video file using curl to the exposed http port 
+```bash
+curl -v -F video=@Garage_07-46-09.mp4 http://127.0.0.1:8080/lookforperson`
+```
+3. Check the results on webpage http://127.0.0.1:1880
+
+![Sample](https://i.imgur.com/u39XpJp.png)
+
+## Description
 ### Input:
 HTTP post to `/lookforperson`
 #### Parameters:
@@ -104,17 +118,3 @@ docker-compose build
 {"success": true, "confidence": "0.7131952", "width": 14, "height": 31, "ratio_diff": 10, "comment": "Person was found"}
 ```
 
-## Demonstration
-I've created a very demonstration docker-compose file that can be used to test the service. 
-
-1. Start the setup with the file in the [github](https://github.com/nidayand/video-people-detection-with-http-post) repository
-```bash
-docker-compose -f docker-compose-demo.yml up
-```
-2.  Post a video file using curl to the exposed http port 
-```bash
-curl -v -F video=@Garage_07-46-09.mp4 http://127.0.0.1:8080/lookforperson`
-```
-3. Check the results on webpage http://127.0.0.1:1880
-
-![Sample](https://i.imgur.com/u39XpJp.png)
