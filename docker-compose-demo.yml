@@ -5,7 +5,7 @@ services:
     image: "nidayand/video-people-detection-with-http-post"
     environment: 
       - URLPATH=http://nodered:1880/videonotify
-      - CONFIDENCE=0.5
+      - CONFIDENCE=0.2
       - GOOD_ENOUGH_CONFIDENCE=0.7
       - FRAMES=5
       - WIDTH=640
@@ -22,6 +22,4 @@ services:
     image: nodered/node-red
     ports:
       - 1880:1880
-    entrypoint: bash -c "curl https://raw.githubusercontent.com/nidayand/video-people-detection-with-http-post/main/simple-demo.tar.gz - | tar -xz && npm start --cache /data/.npm -- --userDir /data demo.json"
-#    volumes:
-#      - ./demo:/data
+    entrypoint: bash -c "curl https://raw.githubusercontent.com/nidayand/video-people-detection-with-http-post/main/simple-demo.tar.gz | tar -xz -C /data && npm start --cache /data/.npm -- --userDir /data/demo"

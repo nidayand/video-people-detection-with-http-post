@@ -104,12 +104,17 @@ docker-compose build
 {"success": true, "confidence": "0.7131952", "width": 14, "height": 31, "ratio_diff": 10, "comment": "Person was found"}
 ```
 
-## Test
-```bash
-curl -v -F video=@Garage_07-13-12.mp4 http://127.0.0.1:8094/lookforperson
-```
+## Demonstration
+I've created a very demonstration docker-compose file that can be used to test the service. 
 
-Example Node-RED as backend to show the result
-```javascript
-[{"id":"64002901.0fe618","type":"http in","z":"5c98d892.1f31c8","name":"","url":"/videonotify","method":"post","upload":true,"swaggerDoc":"","x":460,"y":180,"wires":[["20177ddc.2a7f92","6328d5fe.6d717c","f4fd9714.24ebb8"]]},{"id":"20177ddc.2a7f92","type":"debug","z":"5c98d892.1f31c8","name":"","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"true","targetType":"full","x":870,"y":180,"wires":[]},{"id":"6328d5fe.6d717c","type":"http response","z":"5c98d892.1f31c8","name":"","statusCode":"200","headers":{},"x":670,"y":260,"wires":[]},{"id":"f4fd9714.24ebb8","type":"image","z":"5c98d892.1f31c8","name":"","width":"640","data":"req.files[0].buffer","dataType":"msg","thumbnail":false,"active":true,"pass":false,"outputs":0,"x":900,"y":260,"wires":[]}]
+1. Start the setup with the file in the [github](https://github.com/nidayand/video-people-detection-with-http-post) repository
+```bash
+docker-compose -f docker-compose-demo.yml up
 ```
+2.  Post a video file using curl to the exposed http port 
+```bash
+curl -v -F video=@Garage_07-46-09.mp4 http://127.0.0.1:8080/lookforperson`
+```
+3. Check the results on webpage http://127.0.0.1:1880
+
+![Sample](https://i.imgur.com/u39XpJp.png)
