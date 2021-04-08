@@ -95,7 +95,11 @@ services:
       # Validate that height/width of a person is not above difference compared to max HEIGHT_PERSON/WIDTH_PERSON
       # Avoids strange dimensions e.g. 50x3 when more likely 50x25
       # Set to 0 to disable or remove entry
-      - WIDTH_HEIGHT_RATIO_COMPARE_DIFF=20  
+      - WIDTH_HEIGHT_RATIO_COMPARE_DIFF=20 
+
+      # Max size for the video to be analyzed in MB. If set to larger files make sure the set GOOD_ENOUGH_CONFIDENCE
+      # to limit the amount of frames required to be processed
+      - MAX_SIZE=20
 ```
 
 
