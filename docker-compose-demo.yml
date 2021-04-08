@@ -11,8 +11,8 @@ services:
       - WIDTH=640
       - HEIGHT=480
       - WIDTH_PERSON=40
-      - HEIGHT_PERSON=90
-      - WIDTH_HEIGHT_RATIO_COMPARE_DIFF=20
+      - HEIGHT_PERSON=140
+      - WIDTH_HEIGHT_RATIO_COMPARE_DIFF=32
       - MAX_SIZE=80
     ports:
       - 8080:8080
