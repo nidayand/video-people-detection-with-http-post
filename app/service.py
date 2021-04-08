@@ -3,7 +3,7 @@ import json
 from urllib.parse import urlparse
 from flask import Flask, request, render_template
 from scan import Detect
-import os
+import os, logging, sys
 import tempfile
 
 
@@ -17,22 +17,23 @@ dparams = {
     "height_person": int(os.getenv("HEIGHT_PERSON", "0")),
     "width": int(os.getenv("WIDTH", "640")),
     "height": int(os.getenv("HEIGHT", "480")),
-    "ratio": int(os.getenv("WIDTH_HEIGHT_RATIO_COMPARE_DIFF","0"))
+    "ratio": int(os.getenv("WIDTH_HEIGHT_RATIO_COMPARE_DIFF", "0")),
 }
 
 # set image correcting
 scewed = (dparams["width"], dparams["height"])
 
 app = Flask(__name__)
-staticVideoPath = '/tmp/video.mp4'
+staticVideoPath = "/tmp/video.mp4"
 
-@app.route('/lookforperson', methods=['POST'])
-
+@app.route("/lookforperson", methods=["POST"])
 def lookforperson():
-    print("Posted file: {}".format(request.files['video']))
-    file = request.files['video']
+    app.logger.info("Posted file: %s", request.files["video"])
+    file = request.files["video"]
 
-    tmp_filename = tempfile._get_default_tempdir()+"/"+next(tempfile._get_candidate_names())
+    tmp_filename = (
+        tempfile._get_default_tempdir() + "/" + next(tempfile._get_candidate_names())
+    )
 
     # Save to path
     file.save(tmp_filename)
@@ -41,7 +42,7 @@ def lookforperson():
 
 # to be used by the action rule to initate the object detection
 def check_video(video):
-    print("A new video to analyze!")
+    app.logger.info("A new video to analyze!")
 
     # instantiate the detection object
     obj = Detect(dparams)
@@ -55,9 +56,9 @@ def check_video(video):
 
 def run():
     # start web server
-    app.run(host='0.0.0.0', port=8080, debug=True)
+    app.run(host="0.0.0.0", port=8080, debug=True)
 
-    print("started server")
+    app.logger.debug("Started server successfully")
     httpd.serve_forever()
 
 

@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 import video
 import time
-import os, json
+import os, json, shutil, logging
 import requests
 
 # initialize the list of class labels MobileNet SSD was trained to
@@ -59,6 +59,7 @@ COLORS = np.random.uniform(0, 255, size=(len(CLASSES), 3))
 prototxt = "MobileNetSSD_deploy.prototxt.txt"
 model = "MobileNetSSD_deploy.caffemodel"
 
+log = logging.getLogger('service.sub')
 
 class Detect:
     def __init__(self, dparams):
@@ -75,7 +76,7 @@ class Detect:
 
         global prototxt, model
 
-        print("loading model")
+        log.debug("loading model")
         self.net = cv2.dnn.readNetFromCaffe(prototxt, model)
 
     description = "Scanning for a person and sends an image if detected"
@@ -89,7 +90,7 @@ class Detect:
         try:
             if os.stat(movie).st_size / 1024 / 1024 > int(os.getenv("MAX_SIZE", "20")):
                 # too large file to process
-                print("too large file to process. skipping. " + movie)
+                log.debug("too large file to process. skipping. " + movie)
                 return
         except:
             pass
@@ -99,7 +100,7 @@ class Detect:
         c = 0
         while not avail:
             if c > 30:
-                print(
+                log.debug(
                     "it takes too long time to open the video (>60s). skipping analysis (exit)"
                 )
                 return
@@ -112,14 +113,14 @@ class Detect:
                 c += 1
                 time.sleep(2)
 
-        print("movie is ready to be read!")
+        log.debug("movie is ready to be read!")
 
         # verifying again that the saved file did not exceed
         # during saving 20 MB
         try:
             if os.stat(movie).st_size / 1024 / 1024 > int(os.getenv("MAX_SIZE", "20")):
                 # too large file to process
-                print("too large file to process. skipping. " + movie)
+                log.debug("too large file to process. skipping. " + movie)
                 return
         except:
             pass
@@ -130,6 +131,24 @@ class Detect:
         person_height = 0
         output_image = None
         output_ratio = 0
+
+        # check if debug
+        debug = False
+        debugFileCounter = 0
+        if (os.path.isdir('/debug')):
+            debug = True
+
+            # Clear content in directory
+            folder = '/debug'
+            for filename in os.listdir(folder):
+                file_path = os.path.join(folder, filename)
+                try:
+                    if os.path.isfile(file_path) or os.path.islink(file_path):
+                        os.unlink(file_path)
+                    elif os.path.isdir(file_path):
+                        shutil.rmtree(file_path)
+                except Exception as e:
+                    log.debug('Failed to delete %s. Reason: %s' % (file_path, e))
 
         while True:
             # dont analyze every frame. it will simply
@@ -159,7 +178,7 @@ class Detect:
 
             # pass the blob through the network and obtain the detections and
             # predictions
-            # print("[INFO] computing object detections...")
+            # log.debug("[INFO] computing object detections...")
             self.net.setInput(blob)
             detections = self.net.forward()
 
@@ -176,6 +195,24 @@ class Detect:
 
                 # extract confidence
                 confidence = detections[0, 0, i, 2]
+
+                def printFrame(txt = False):
+                    if txt:
+                        label = "{}: {:.2f}%".format(txt, confidence * 100)
+                    else:
+                        label = "{}: {:.2f}%".format(CLASSES[idx], confidence * 100)
+                    log.debug("[INFO] {}".format(label))
+                    cv2.rectangle(frame, (startX, startY), (endX, endY), COLORS[idx], 2)
+                    y = startY - 15 if startY - 15 > 15 else startY + 15
+                    cv2.putText(
+                        frame,
+                        label,
+                        (startX, y),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        0.5,
+                        COLORS[idx],
+                        2,
+                    )
 
                 # filter out for higher confidence than confidenceset var
                 if confidence > self.conf and confidence > highest_confidence:
@@ -199,31 +236,40 @@ class Detect:
                             compareValue = int(compareValue * 100)
                             if compareValue > self.ratio:
                                 # Ration height/width differs too much. Skip
+                                if debug:
+                                    printFrame("Ratio "+str(compareValue)+">"+str(self.ratio)+"("+str(person_width)+"x"+str(person_height)+")")
+                                    debugFileCounter = debugFileCounter + 1
+                                    cv2.imwrite("/debug/"+str(debugFileCounter)+".jpg", frame)
                                 continue
                             output_ratio = compareValue
 
                         if person_width > self.width_person:
+                            if debug:
+                                printFrame("Width>")
+                                debugFileCounter = debugFileCounter + 1
+                                cv2.imwrite("/debug/"+str(debugFileCounter)+".jpg", frame)
                             continue
                         if person_height > self.height_person:
+                            if debug:
+                                printFrame("Height>")
+                                debugFileCounter = debugFileCounter + 1
+                                cv2.imwrite("/debug/"+str(debugFileCounter)+".jpg", frame)
                             continue
-
-                    label = "{}: {:.2f}%".format(CLASSES[idx], confidence * 100)
-                    print("[INFO] {}".format(label))
-                    cv2.rectangle(frame, (startX, startY), (endX, endY), COLORS[idx], 2)
-                    y = startY - 15 if startY - 15 > 15 else startY + 15
-                    cv2.putText(
-                        frame,
-                        label,
-                        (startX, y),
-                        cv2.FONT_HERSHEY_SIMPLEX,
-                        0.5,
-                        COLORS[idx],
-                        2,
-                    )
+                    
+                    printFrame()
 
                     # store the output image
                     output_image = frame
                     highest_confidence = confidence
+
+                    if debug:
+                        debugFileCounter = debugFileCounter + 1
+                        cv2.imwrite("/debug/"+str(debugFileCounter)+".jpg", output_image)
+                else:
+                    if debug:
+                        printFrame("Conf<")
+                        debugFileCounter = debugFileCounter + 1
+                        cv2.imwrite("/debug/"+str(debugFileCounter)+".jpg", frame)
 
                 # DETECTIONS IN FRAME: Check if higher than "good_enough_conf"
                 if highest_confidence >= self.good_enough_conf:

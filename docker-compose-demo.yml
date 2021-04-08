@@ -6,13 +6,14 @@ services:
     environment: 
       - URLPATH=http://nodered:1880/videonotify
       - CONFIDENCE=0.2
-      - GOOD_ENOUGH_CONFIDENCE=0.7
-      - FRAMES=5
+      - GOOD_ENOUGH_CONFIDENCE=0.95
+      - FRAMES=1
       - WIDTH=640
       - HEIGHT=480
-      - WIDTH_PERSON=30
-      - HEIGHT_PERSON=60
-      - WIDTH_HEIGHT_RATIO_COMPARE_DIFF=20  
+      - WIDTH_PERSON=40
+      - HEIGHT_PERSON=90
+      - WIDTH_HEIGHT_RATIO_COMPARE_DIFF=20
+      - MAX_SIZE=80
     ports:
       - 8080:8080
     links:
