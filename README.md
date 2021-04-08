@@ -123,3 +123,20 @@ docker-compose build
 {"success": true, "confidence": "0.7131952", "width": 14, "height": 31, "ratio_diff": 10, "comment": "Person was found"}
 ```
 
+## Tuning
+By mounting a local directory to `/debug` you will get frame by frame analysis that can be used to tune your parameters.
+
+```yaml
+  ...
+    volumes: 
+      # USED FOR DEBUG WHEN TUNING PARAMETERS. If set will save each frame analyzed in a subfolder
+      - "./debug:/debug"
+```
+
+Each frame will be stored as a jpg with comments on why it was not the final frame. Note that this will affect performance and use only when tuning your parameters.
+
+Examples
+- `Conf<`: the confidence level of the person detected is lower than previously found. The box inidicates the position of the frame where the higest confidence was detected
+- `Ratio 30>20(30x47)`: The ratio of the box is higher than maximum allowed and in brackets are the dimensions of the box identified. `20` is in this case the `WIDTH_HEIGHT_RATIO_COMPARE_DIFF` value
+- `Width>`: The width is larger than `WIDTH_PERSON`
+- `Height>`: The height is larger than `HEIGHT_PERSON`
