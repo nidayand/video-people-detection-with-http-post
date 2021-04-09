@@ -2,7 +2,7 @@
 The container includes a web server that is listening after an incoming HTTP POST message to the `/lookforperson` path. The incoming message must include a video that is to be analyzed on a parameter named `video`.
 Based on the environment settings it will look for a person in the frames of the video, and if found it will do an HTTP POST request to a web server address of choice and attach the detected frame, with the highest confidence level, and the details of the detection.
 
-The OpenCV library used is compiled to be able to run on a Synology NAS.
+The OpenCV library used is compiled to be able to run on a **Synology NAS** or a **Jetson Nano**. The Jetson Nano build is based on dustynv/jetson-inference as the base docker container as it is precompiled with OpenCV and contains the JetPack.
 
 ## Demonstration
 I've created a very simple docker-compose file that can be used to test the service. The demo is using Node-RED to present the results from the video file analysis.
@@ -49,7 +49,7 @@ I use the container to get rid of any CCTV notification noise - i.e. I'm alerted
 1. In MotionEye OS I have 6 video streams that is triggering recordings based on changes in the number of pixels in a frame
 2. If a motion is detected MotionEye will run a command when the file has been saved
 ```bash
-curl -F video=@%f http://192.168.2.244:8094/lookforperson
+curl -F video=@%f http://192.168.2.244:8080/lookforperson
 ```
 ![MotionEye](https://i.imgur.com/nE9e9c9.png)
 
@@ -69,7 +69,7 @@ services:
       dockerfile: Dockerfile
     image: "nidayand/video-people-detection-with-http-post"
     ports:
-      - "8094:8080"
+      - "8080:8080"
     environment: 
       # URL to post image result to. Path will be appended with a field called "file" with type image/jpg
       - URLPATH=http://192.168.2.104:1880/videonotify
@@ -89,13 +89,13 @@ services:
 
       # MAX % of image that can be a person
       # Set to 0 to disable or remove entry
-      - WIDTH_PERSON=30
-      - HEIGHT_PERSON=60
+      - WIDTH_PERSON=40
+      - HEIGHT_PERSON=140
 
       # Validate that height/width of a person is not above difference compared to max HEIGHT_PERSON/WIDTH_PERSON
       # Avoids strange dimensions e.g. 50x3 when more likely 50x25
       # Set to 0 to disable or remove entry
-      - WIDTH_HEIGHT_RATIO_COMPARE_DIFF=20 
+      - WIDTH_HEIGHT_RATIO_COMPARE_DIFF=32
 
       # Max size for the video to be analyzed in MB. If set to larger files make sure the set GOOD_ENOUGH_CONFIDENCE
       # to limit the amount of frames required to be processed

@@ -8,36 +8,8 @@ services:
     image: "nidayand/video-people-detection-with-http-post"
     ports:
       - "8094:8080"
-    environment: 
-      # URL to post image result to. Path will be appended with a field called "file" with type image/jpg
-      - URLPATH=http://192.168.2.104:1880/videonotify
-
-      # Confidence level of assessed frames
-      - CONFIDENCE=0.5
-
-      # Good enough confidence level. If this level or above don't continue with the video analysis
-      - GOOD_ENOUGH_CONFIDENCE=0.7
-
-      # Every x frame will be checked for a person
-      - FRAMES=1
-
-      # Resizing frame for analysis to improve performance. Default values 640/480
-      - WIDTH=640
-      - HEIGHT=480
-
-      # MAX % of image that can be a person
-      # Set to 0 to disable or remove entry
-      - WIDTH_PERSON=40
-      - HEIGHT_PERSON=140
-
-      # Validate that height/width of a person is not above difference compared to max HEIGHT_PERSON/WIDTH_PERSON
-      # Avoids strange dimensions e.g. 50x3 when more likely 50x25
-      # Set to 0 to disable or remove entry
-      - WIDTH_HEIGHT_RATIO_COMPARE_DIFF=32
-
-      # Max size for the video to be analyzed in MB. If set to larger files make sure the set GOOD_ENOUGH_CONFIDENCE
-      # to limit the amount of frames required to be processed
-      - MAX_SIZE=20
+    env_file: 
+      - scan_settings.env
 
     #volumes: 
       # USED FOR DEVELOPMENT. MOUNTS LOCAL app FOLDER to replace copied version
