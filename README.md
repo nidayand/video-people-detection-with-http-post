@@ -2,7 +2,7 @@
 The container includes a web server that is listening after an incoming HTTP POST message to the `/lookforperson` path. The incoming message must include a video that is to be analyzed on a parameter named `video`.
 Based on the environment settings it will look for a person in the frames of the video, and if found it will do an HTTP POST request to a web server address of choice and attach the detected frame, with the highest confidence level, and the details of the detection.
 
-The OpenCV library used is compiled to be able to run on a **Synology NAS** or a **Jetson Nano**. The Jetson Nano build is based on dustynv/jetson-inference as the base docker container as it is precompiled with OpenCV and contains the JetPack.
+The OpenCV library used is compiled to be able to run on a **Synology NAS**
 
 ## Demonstration
 I've created a very simple docker-compose file that can be used to test the service. The demo is using Node-RED to present the results from the video file analysis.
