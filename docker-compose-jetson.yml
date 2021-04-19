@@ -1,0 +1,21 @@
+version: "2"
+services:
+  people_recognition:
+    container_name: opencv_findperson
+    build:
+      context: .
+      dockerfile: Dockerfile-jetson
+    image: "nidayand/video-people-detection-with-http-post:jetson"
+    ports:
+      - "8094:8080"
+    runtime: nvidia
+    env_file: 
+      - scan_settings.env
+
+    #volumes: 
+      # USED FOR DEVELOPMENT. MOUNTS LOCAL app FOLDER to replace copied version
+      #- "./app:/app" 
+
+      # USED FOR DEBUG WHEN TUNING PARAMETERS. If set will save each frame analyzed in a subfolder
+      #- "./debug:/debug"
+

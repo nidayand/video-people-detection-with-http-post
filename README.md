@@ -4,6 +4,10 @@ Based on the environment settings it will look for a person in the frames of the
 
 The OpenCV library used is compiled to be able to run on a **Synology NAS**
 
+## Tags
+- latest: With OpenCV compiled to run on a **Synology NAS**
+- jetson: Using [nvcr.io/nvidia/l4t-ml:r32.5.0-py3](https://ngc.nvidia.com/catalog/containers/nvidia:l4t-ml) as base and tested on **Jetson Nano 2GB Developer Kit**
+
 ## Demonstration
 I've created a very simple docker-compose file that can be used to test the service. The demo is using Node-RED to present the results from the video file analysis.
 Use your own mp4-file and post it to the service endpoint that will analyze the frames and send the result - if a person is found - to display in the Node-RED UI.

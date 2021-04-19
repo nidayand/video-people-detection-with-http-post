@@ -1,0 +1,16 @@
+FROM nvcr.io/nvidia/l4t-ml:r32.5.0-py3
+
+RUN apt install python3-pip
+RUN pip3 install flask
+RUN pip3 install requests --upgrade
+
+# Set the working directory to /app
+WORKDIR /app
+
+ADD ./app /app
+
+# Make port 80 available to the world outside this container
+EXPOSE 8080
+
+# Run app.py when the container launches
+CMD ["python3", "-u", "service.py"]
