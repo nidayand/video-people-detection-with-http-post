@@ -2,8 +2,6 @@
 The container includes a web server that is listening after an incoming HTTP POST message to the `/lookforperson` path. The incoming message must include a video that is to be analyzed on a parameter named `video`.
 Based on the environment settings it will look for a person in the frames of the video, and if found it will do an HTTP POST request to a web server address of choice and attach the detected frame, with the highest confidence level, and the details of the detection.
 
-The OpenCV library used is compiled to be able to run on a **Synology NAS**
-
 ## Tags
 - latest: With OpenCV compiled to run on a **Synology NAS**
 - jetson: Using [nvcr.io/nvidia/l4t-ml:r32.5.0-py3](https://ngc.nvidia.com/catalog/containers/nvidia:l4t-ml) as base and tested on **Jetson Nano 2GB Developer Kit**
