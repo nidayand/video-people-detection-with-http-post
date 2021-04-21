@@ -104,7 +104,21 @@ services:
       - MAX_SIZE=20
 ```
 
+## Docker Run
 
+```bash
+docker run -p 8080:8080 \
+  -e "URLPATH=http://192.168.2.104:1880/videonotify" \
+  -e "CONFIDENCE=0.5" -e "GOOD_ENOUGH_CONFIDENCE=0.7" \
+  -e "FRAMES=5" \
+  -e "WIDTH=640" \
+  -e "HEIGHT=480" \
+  -e "WIDTH_PERSON=40" \
+  -e "HEIGHT_PERSON=140" \
+  -e "WIDTH_HEIGHT_RATIO_COMPARE_DIFF=32" \
+  -e "MAX_SIZE=20" \
+  --name opencv_findperson --restart always nidayand/video-people-detection-with-http-post:latest
+```
 
 ## Build
 ```bash
