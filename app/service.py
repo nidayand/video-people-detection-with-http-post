@@ -26,6 +26,8 @@ scewed = (dparams["width"], dparams["height"])
 app = Flask(__name__)
 staticVideoPath = "/tmp/video.mp4"
 
+uploadDirectory = '/upload-dir'
+
 @app.route("/lookforperson", methods=["POST"])
 def lookforperson():
     app.logger.info("Posted file: %s", request.files["video"])
@@ -47,8 +49,12 @@ def check_video(video):
     # instantiate the detection object
     obj = Detect(dparams)
 
-    # run the analysis of the file
-    res = obj.run(video, scewed)
+    try:
+        # run the analysis of the file
+        res = obj.run(video, scewed)
+    finally:
+        # delete the file
+        os.remove(video)
 
     # save id
     return json.dumps(res)
