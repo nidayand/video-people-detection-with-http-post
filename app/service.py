@@ -26,8 +26,6 @@ scewed = (dparams["width"], dparams["height"])
 app = Flask(__name__)
 staticVideoPath = "/tmp/video.mp4"
 
-uploadDirectory = '/upload-dir'
-
 @app.route("/lookforperson", methods=["POST"])
 def lookforperson():
     app.logger.info("Posted file: %s", request.files["video"])
