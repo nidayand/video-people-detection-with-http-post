@@ -14,13 +14,15 @@ Use your own mp4-file and post it to the service endpoint that will analyze the 
 ```bash
 docker-compose -f docker-compose-demo.yml up
 ```
-2.  Post a video file using curl to the exposed http port 
-```bash
-curl -v -F video=@Garage_07-46-09.mp4 http://127.0.0.1:8080/lookforperson
-```
-3. Check the results on webpage http://127.0.0.1:1880
+2. Open the Node-RED local webpage http://127.0.0.1:1880
 
-![Sample](https://i.imgur.com/u39XpJp.png)
+3.  Post a video file using curl to the exposed http port. 
+E.g. use a sample file such as the [this one](https://videos.cctvcamerapros.com/videos/15fps-surveillance-video.mp4) found from https://videos.cctvcamerapros.com/surveillance-video-samples/15-frames-per-second.html
+```bash
+curl -v -F video=@15fps-surveillance-video.mp4 http://127.0.0.1:8080/lookforperson
+```
+
+![Sample](https://i.imgur.com/scnJMVt.jpg)
 
 ## Description
 ### Input:
