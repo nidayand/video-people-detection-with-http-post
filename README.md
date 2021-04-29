@@ -16,7 +16,7 @@ docker-compose -f docker-compose-demo.yml up
 ```
 2.  Post a video file using curl to the exposed http port 
 ```bash
-curl -v -F video=@Garage_07-46-09.mp4 http://127.0.0.1:8080/lookforperson`
+curl -v -F video=@Garage_07-46-09.mp4 http://127.0.0.1:8080/lookforperson
 ```
 3. Check the results on webpage http://127.0.0.1:1880
 
